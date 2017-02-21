@@ -75,7 +75,6 @@ class RequestHandler
 
         $router = Router::getInstance();
         $route = $router->route($request);
-
         $this->context->set('controller_name', $route['controller_name']);
         $this->context->set('action_name', $route['action_name']);
 

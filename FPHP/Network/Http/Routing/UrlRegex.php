@@ -33,7 +33,7 @@ class UrlRegex {
         $regex  = '#' . $regex . '#i';
         return [
             'regex' => $regex,
-            'url'  => $realUrl
+            'url'   => $realUrl
         ];
     }
 

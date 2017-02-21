@@ -7,5 +7,5 @@
  * Time: 10:57
  */
 return [
-    '404'   => '/Error/notFound'
+    '404'   => '/404'
 ];

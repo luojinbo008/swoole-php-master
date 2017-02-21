@@ -10,9 +10,9 @@ namespace Com\Demo\Src\Controller\Error;
 
 use FPHP\Foundation\Domain\HttpController as Controller;
 
-class NotFoundController extends Controller
+class HttpErrorController extends Controller
 {
-    public function index()
+    public function notFoundPage()
     {
         if ($this->request->isAjax()) {
             yield $this->r(404, "404 Not Found", []);

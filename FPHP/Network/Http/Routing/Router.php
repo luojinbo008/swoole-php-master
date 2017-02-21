@@ -112,7 +112,7 @@ class Router {
 
     private function setParameters(Request $request, array $parameters = [])
     {
-        if(empty($parameters)) {
+        if (empty($parameters)) {
             return;
         }
         $request->query->add($parameters);
