@@ -29,7 +29,7 @@ class UrlRegex {
     private static function parseRule($regex, $realUrl)
     {
         $regex  = self::parseRegex($regex);
-        $regex  = str_replace('/','\/',$regex);
+        $regex  = str_replace('/', '\/', $regex);
         $regex  = '#' . $regex . '#i';
         return [
             'regex' => $regex,

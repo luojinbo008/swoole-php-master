@@ -12,6 +12,7 @@ use FPHP\Network\Http\ServerStart\InitMiddleware;
 use FPHP\Network\Http\ServerStart\InitUrlConfig;
 use FPHP\Network\Http\ServerStart\InitRouter;
 use FPHP\Network\Http\ServerStart\InitUrlRule;
+use FPHP\Network\Server\ServerStart\InitConnectionPool;
 
 use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
@@ -30,7 +31,7 @@ class Server extends ServerBase
     ];
 
     protected $workerStartItems = [
-
+        InitConnectionPool::class,
     ];
 
     /**

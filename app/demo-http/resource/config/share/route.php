@@ -6,8 +6,8 @@
  * Time: 13:04
  */
 return [
-    'default_route'         => '/demo',
-    'default_controller'    => 'index',
+    'default_route'         => 'Index',
+    'default_controller'    => 'Index',
     'default_action'        => 'index',
     'default_format'        => 'html',
 ];

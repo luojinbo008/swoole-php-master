@@ -88,8 +88,7 @@ class Router {
     {
         $path = array_filter(explode($this->separator, $this->route));
         $pathCount = count($path);
-        switch($pathCount)
-        {
+        switch ($pathCount) {
             case 0:
                 $this->setDefaultRoute();
                 break;
