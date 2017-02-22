@@ -57,7 +57,6 @@ class Pool implements ConnectionPool
         } else {
             $this->freeConnection->push($connection);
         }
-
         $connection->setPool($this);
         $connection->heartbeat();
         $connection->setEngine($this->type);
@@ -81,14 +80,13 @@ class Pool implements ConnectionPool
 
     public function get()
     {
-
         if ($this->freeConnection->isEmpty()) {
             return null;
         }
         $conn = $this->freeConnection->pop();
         $this->activeConnection->push($conn);
 
-//        deferRelease($conn);
+        // deferRelease($conn);
         return $conn;
     }
 
@@ -96,6 +94,7 @@ class Pool implements ConnectionPool
     {
         $this->freeConnection->push($conn);
         $this->activeConnection->remove($conn);
+
         if (count($this->freeConnection) == 1) {
 
             // 唤醒等待事件

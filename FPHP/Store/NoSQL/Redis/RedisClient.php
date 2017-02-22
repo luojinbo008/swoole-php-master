@@ -166,8 +166,8 @@ class RedisConnection
     /**
      * 清理数据
      */
-
-    public function clean() {
+    public function clean()
+    {
         $this->buffer = '';
         $this->callback;
         $this->wait_send = false;
@@ -181,13 +181,14 @@ class RedisConnection
      * @param $cmd
      * @param $callback
      */
-    public function command($cmd, $callback) {
-
+    public function command($cmd, $callback)
+    {
         if ($this->client->isConnected()) { // 如果已经连接，直接发送数据
             $this->client->send($cmd);
-        } else { // 未连接，等待连接成功后发送数据
+        } else {                            // 未连接，等待连接成功后发送数据
             $this->wait_send = $cmd;
         }
+
         $this->callback = $callback;
 
         // 从空闲连接池中移除，避免被其他任务使用

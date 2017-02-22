@@ -98,7 +98,6 @@ class RequestHandler
 
     public function handleTimeout()
     {
-        echo 123;
         $this->task->setStatus(Signal::TASK_KILLED);
         $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
         $this->context->set('response', $response);

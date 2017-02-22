@@ -83,11 +83,13 @@ abstract class Base implements Connection
         return $this->engine;
     }
 
-    public function setIsAsync($isAsync) {
+    public function setIsAsync($isAsync)
+    {
         $this->isAsync = $isAsync;
     }
 
-    public function getIsAsync() {
+    public function getIsAsync()
+    {
         return $this->isAsync;
     }
 }

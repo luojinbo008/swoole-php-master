@@ -38,6 +38,7 @@ class ConnectionInit
 
     /**
      * @param $directory
+     * @param $server
      */
     public function init($directory, $server)
     {
