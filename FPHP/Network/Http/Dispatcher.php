@@ -32,7 +32,7 @@ class Dispatcher
             throw new PageNotFoundException("action:{$action} is not callable in controller:" . get_class($controller));
         }
 
-        if (method_exists($controller,'init')) {
+        if (method_exists($controller, 'init')) {
             yield $controller->init();
         }
         yield $controller->$action();

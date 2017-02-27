@@ -7,7 +7,7 @@
  */
 
 namespace FPHP\Store\NoSQL\Redis;
-
+use RuntimeException;
 
 class RedisManager
 {
@@ -46,11 +46,16 @@ class RedisManager
     {
         $result = new RedisResult();
         $this->client->set($key, $value, [$result, 'response']);
-        if ($expire >0) {
+        $ret1 = (yield $result);
+        if ($expire > 0) {
             $this->client->EXPIRE($key, $expire, [$result, 'response']);
+            $ret2 = (yield $result);
+            if (!$ret2) {
+                throw new RuntimeException('REDIS EXPIRE TIME ERROR');
+            }
         }
         $this->release();
-        yield $result;
+        yield $ret1;
     }
 
     public function release()

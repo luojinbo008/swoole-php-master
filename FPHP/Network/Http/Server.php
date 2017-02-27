@@ -13,6 +13,7 @@ use FPHP\Network\Http\ServerStart\InitUrlConfig;
 use FPHP\Network\Http\ServerStart\InitRouter;
 use FPHP\Network\Http\ServerStart\InitUrlRule;
 use FPHP\Network\Server\ServerStart\InitConnectionPool;
+use FPHP\Network\Http\ServerStart\InitCache;
 
 use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
@@ -27,7 +28,8 @@ class Server extends ServerBase
         InitUrlRule::class,
         InitUrlConfig::class,
         InitMiddleware::class,
-        InitExceptionHandlerChain::class
+        InitExceptionHandlerChain::class,
+        InitCache::class,
     ];
 
     protected $workerStartItems = [

@@ -9,25 +9,17 @@
 namespace Com\Demo\Src\Controller\WWW;
 
 use FPHP\Foundation\Domain\HttpController as Controller;
-
-use FPHP\Network\Connection\ConnectionManager;
+use FPHP\Store\Facade\Cache;
 
 class IndexController extends Controller
 {
     public function index()
     {
-        try {
-            $connection = (yield ConnectionManager::getInstance()->get('redis.default', 0));
-
-            $socket = $connection->getSocket();
-            $str = $socket->del("11", "d");
-            var_dump($str);
-            $connection->release();
-
-        } catch (\Exception $e) {
-            var_dump($e->getMessage());
-        }
+        yield Cache::set('demo.redis.cc', "xx2222222211", [11, 222]);
+        $tmp = (yield Cache::get('demo.redis.cc', [11, 222]));
+        var_dump($tmp);
 
         yield $this->display('Module/www/index');
     }
+
 }

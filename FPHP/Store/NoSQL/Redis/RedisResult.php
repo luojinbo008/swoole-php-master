@@ -10,7 +10,7 @@ namespace FPHP\Store\NoSQL\Redis;
 
 use FPHP\Foundation\Contract\Async;
 
-class RedisResult implements  Async
+class RedisResult implements Async
 {
 
     private $callback = null;

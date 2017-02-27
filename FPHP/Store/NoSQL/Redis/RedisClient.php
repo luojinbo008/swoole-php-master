@@ -93,6 +93,7 @@ class RedisClient
         $callback = array_pop($args);
         array_unshift($args, $method);
         $cmd = $this->parseRequest($args);
+
         $connection = $this->getConnection();
         $connection->command($cmd, $callback);
     }
@@ -257,7 +258,7 @@ class RedisConnection
                 $this->multi_line = false;
                 return;
             }
-            $result = $lines[1];
+            $result = rtrim($lines[1], "\r\n");
         } elseif ($type == '*') { // 多行数据
             parse_multi_line:
             $data_line_num = intval(substr($lines[0], 1));

@@ -6,5 +6,5 @@
  * Time: 13:15
  */
 return [
-    'index'   => "Error/HttpError/notFoundPage",
+    'index'   => "WWW/Index/index",
 ];

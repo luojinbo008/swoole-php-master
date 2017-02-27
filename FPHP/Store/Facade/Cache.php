@@ -9,13 +9,12 @@
 namespace FPHP\Store\Facade;
 
 use RuntimeException;
-use FPHP\Foundation\Core\Config;
 use FPHP\Network\Connection\ConnectionManager;
 use FPHP\Store\NoSQL\Redis\RedisManager;
 
-class Cache {
-
-    private static $redis=null;
+class Cache
+{
+    private static $redis = null;
 
     private static $cacheMap = null;
 
@@ -28,6 +27,7 @@ class Cache {
     {
         yield self::getRedisManager($configKey);
         $cacheKey = self::getConfigCacheKey($configKey);
+
         $realKey = self::getRealKey($cacheKey, $keys);
         if (!empty($realKey)) {
             $result = (yield self::$redis->get($realKey));
@@ -35,7 +35,7 @@ class Cache {
         }
     }
 
-    public static function expire($configKey, $key, $expire=0)
+    public static function expire($configKey, $key, $expire = 0)
     {
         yield self::getRedisManager($configKey);
         $cacheKey = self::getConfigCacheKey($configKey);
@@ -62,7 +62,7 @@ class Cache {
         $pos = strrpos($configKey, '.');
         $subPath = substr($configKey, 0, $pos);
         $config = self::getConfigCacheKey($subPath);
-        if(!isset($config['common'])) {
+        if (!isset($config['common'])) {
             throw new RuntimeException('connection path config not found');
         }
         return $config['common']['connection'];
@@ -74,12 +74,13 @@ class Cache {
         self::$redis = new RedisManager($conn);
     }
 
-    private static function getRealKey($config, $keys){
+    private static function getRealKey($config, $keys)
+    {
         $format = $config['key'];
-        if($keys === null){
+        if ($keys === null) {
             return $format;
         }
-        if(!is_array($keys)){
+        if (!is_array($keys)) {
             $keys = [$keys];
         }
         $key = call_user_func_array('sprintf', array_merge([$format], $keys));
@@ -89,12 +90,12 @@ class Cache {
     private static function getConfigCacheKey($configKey)
     {
         $result = self::$cacheMap;
-        $routes = explode('.',$configKey);
-        if(empty($routes)){
+        $routes = explode('.', $configKey);
+        if (empty($routes)) {
             return null;
         }
-        foreach($routes as $route){
-            if(!isset($result[$route])){
+        foreach ($routes as $route) {
+            if (!isset($result[$route])) {
                 return null;
             }
             $result = &$result[$route];

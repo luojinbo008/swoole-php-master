@@ -94,7 +94,6 @@ class Scheduler
         ) {
             return null;
         }
-
         $signal = call_user_func($value, $this->task);
         if (Signal::isSignal($signal)) {
             return $signal;
@@ -121,7 +120,6 @@ class Scheduler
         if (!is_subclass_of($value, Async::class)) {
             return null;
         }
-
         $value->execute([$this, 'asyncCallback']);
 
         return Signal::TASK_WAIT;

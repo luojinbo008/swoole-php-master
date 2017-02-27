@@ -48,7 +48,6 @@ class RequestHandler
 
             $requestTask = new RequestTask($request, $swooleResponse, $this->context, $this->middleWareManager);
             $coroutine = $requestTask->run();
-
             //  bind event
             $timeout = $this->context->get('request_timeout');
             $this->event->once($this->getRequestFinishJobId(), [$this, 'handleRequestFinish']);
