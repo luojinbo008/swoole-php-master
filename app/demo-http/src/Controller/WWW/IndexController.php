@@ -15,7 +15,7 @@ class IndexController extends Controller
 {
     public function index()
     {
-        yield Cache::set('demo.redis.cc', "xx2222222211", [11, 222]);
+
         $tmp = (yield Cache::get('demo.redis.cc', [11, 222]));
         var_dump($tmp);
 

@@ -14,39 +14,29 @@ use FPHP\Network\Server\Timer\Timer;
 
 class Redis extends Base implements Connection
 {
-    private $classHash = null;
 
     public function heartbeat()
     {
-
-        // 绑定心跳检测事件
-        $this->classHash = spl_object_hash($this);
         $this->heartbeatLater();
     }
 
     public function heartbeatLater()
     {
-        Timer::after((int)100, [$this, 'heartbeating'], $this->classHash);
+        // 回收 连接池
+        Timer::tick((int)$this->config['pool']['keeping-sleep-time'],
+            [$this, 'sleepkeeping'], spl_object_hash($this));
     }
 
-    public function heartbeating()
+    public function sleepkeeping()
     {
-
-
-        $this->pool->getFreeConnection()->remove($this);
-        $coroutine = $this->ping();
-        Task::execute($coroutine);
-    }
-
-
-    public function ping()
-    {
-        $this->release();
-        $this->heartbeatLater();
+        if (!$this->pool->getActiveConnection()->get(spl_object_hash($this))) {
+            return ;
+        }
+        $this->pool->getActiveConnection()->remove($this);
     }
 
     public function closeSocket()
     {
-        // TODO: Implement closeSocket() method.
+        return true;
     }
 }

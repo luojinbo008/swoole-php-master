@@ -27,7 +27,6 @@ class Cache
     {
         yield self::getRedisManager($configKey);
         $cacheKey = self::getConfigCacheKey($configKey);
-
         $realKey = self::getRealKey($cacheKey, $keys);
         if (!empty($realKey)) {
             $result = (yield self::$redis->get($realKey));

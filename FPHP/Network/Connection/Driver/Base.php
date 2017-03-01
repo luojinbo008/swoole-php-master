@@ -71,6 +71,7 @@ abstract class Base implements Connection
 
     public function heartbeat()
     {
+
     }
 
     public function setEngine($engine)

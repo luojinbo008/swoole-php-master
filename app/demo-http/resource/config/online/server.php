@@ -11,7 +11,7 @@ return [
     'host'          => '192.168.56.101',
     'port'          => '8991',
     'config' => [
-        'worker_num'    => 2,
+        'worker_num'    => 1,
     ],
     'monitor' => [
         'max_request'   => 100000,

@@ -11,8 +11,8 @@ return [
         'host'      => '127.0.0.1',
         'port'      => 6379,
         'pool'      => [
-            'keeping-sleep-time'    => '1000',
-            'init-connection'       => '4',
+            'keeping-sleep-time'    => '500',
+            'init-connection'       => '1',
         ],
     ],
 ];

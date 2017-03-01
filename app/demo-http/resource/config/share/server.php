@@ -8,5 +8,5 @@
  */
 
 return [
-    'request_timeout' => 1 * 1000
+    'request_timeout' => 2 * 1000
 ];

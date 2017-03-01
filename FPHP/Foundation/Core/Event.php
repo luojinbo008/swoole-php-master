@@ -73,7 +73,6 @@ class Event
         if (isset(self::$evtMap[$evtName]) && self::$evtMap[$evtName]) {
             self::fireEvents($evtName, $args, $loop);
         }
-
         EventChain::fireEventChain($evtName);
     }
 
