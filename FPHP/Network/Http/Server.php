@@ -9,6 +9,7 @@
 namespace FPHP\Network\Http;
 use FPHP\Network\Http\ServerStart\InitExceptionHandlerChain;
 use FPHP\Network\Http\ServerStart\InitMiddleware;
+use FPHP\Network\Http\ServerStart\InitSqlMap;
 use FPHP\Network\Http\ServerStart\InitUrlConfig;
 use FPHP\Network\Http\ServerStart\InitRouter;
 use FPHP\Network\Http\ServerStart\InitUrlRule;
@@ -30,6 +31,7 @@ class Server extends ServerBase
         InitMiddleware::class,
         InitExceptionHandlerChain::class,
         InitCache::class,
+        InitSqlMap::class,
     ];
 
     protected $workerStartItems = [

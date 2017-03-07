@@ -11,6 +11,6 @@ return [
     ],
     'cc' => [
         'key' => 'test_abc_%s_%s',
-        'exp' => 30
+        'exp' => 300
     ],
 ];

@@ -10,16 +10,20 @@ namespace Com\Demo\Src\Controller\WWW;
 
 use FPHP\Foundation\Domain\HttpController as Controller;
 use FPHP\Store\Facade\Cache;
+use FPHP\Store\Facade\Db;
 
 class IndexController extends Controller
 {
     public function index()
     {
 
+        $record = (yield Db::execute('mysql.demo.demo', []));
+        var_dump($record);
+
         $tmp = (yield Cache::get('demo.redis.cc', [11, 222]));
-        var_dump($tmp);
 
         yield $this->display('Module/www/index');
+
     }
 
 }
