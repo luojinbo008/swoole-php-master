@@ -2,8 +2,8 @@
 /**
  * Created by PhpStorm.
  * User: luojinbo
- * Date: 2017/2/21
- * Time: 16:09
+ * Date: 2017/3/8
+ * Time: 11:09
  */
 
 namespace FPHP\Network\Connection\Driver;
@@ -11,10 +11,10 @@ namespace FPHP\Network\Connection\Driver;
 use FPHP\Contract\Network\Connection;
 use FPHP\Foundation\Coroutine\Task;
 use FPHP\Network\Server\Timer\Timer;
-use FPHP\Store\Database\Mysql\Exception\MysqliConnectionLostException;
-use FPHP\Store\Database\Mysql\Mysqli as Engine;
+use FPHP\Store\Database\Mysql\Exception\MysqlConnectionLostException;
+use FPHP\Store\Database\Mysql\Mysql as Engine;
 
-class Mysqli extends Base implements Connection
+class Mysql extends Base implements Connection
 {
     private $classHash = null;
 
@@ -51,9 +51,9 @@ class Mysqli extends Base implements Connection
     public function ping()
     {
         $engine = new Engine($this);
-        try{
+        try {
             $result = (yield $engine->query('select 1'));
-        } catch (MysqliConnectionLostException $e){
+        } catch (MysqlConnectionLostException $e){
             return;
         }
 

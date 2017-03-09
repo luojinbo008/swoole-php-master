@@ -12,13 +12,13 @@ use FPHP\Contract\Network\Connection;
 use FPHP\Contract\Store\Database\DbResultInterface;
 use FPHP\Contract\Store\Database\DriverInterface;
 use FPHP\Network\Server\Timer\Timer;
-use FPHP\Store\Database\Mysql\Exception\MysqliConnectionLostException;
-use FPHP\Store\Database\Mysql\Exception\MysqliQueryException;
-use FPHP\Store\Database\Mysql\Exception\MysqliQueryTimeoutException;
-use FPHP\Store\Database\Mysql\Exception\MysqliSqlSyntaxException;
-use FPHP\Store\Database\Mysql\Exception\MysqliTransactionException;
+use FPHP\Store\Database\Mysql\Exception\MysqlConnectionLostException;
+use FPHP\Store\Database\Mysql\Exception\MysqlQueryException;
+use FPHP\Store\Database\Mysql\Exception\MysqlQueryTimeoutException;
+use FPHP\Store\Database\Mysql\Exception\MysqlSqlSyntaxException;
+use FPHP\Store\Database\Mysql\Exception\MysqlTransactionException;
 
-class Mysqli implements DriverInterface
+class Mysql implements DriverInterface
 {
     /**
      * @var Connection
@@ -63,10 +63,11 @@ class Mysqli implements DriverInterface
     public function query($sql)
     {
         $config = $this->connection->getConfig();
+
         $timeout = isset($config['timeout']) ? $config['timeout'] : self::DEFAULT_QUERY_TIMEOUT;
         $this->sql = $sql;
 
-        swoole_mysql_query($this->connection->getSocket(), $this->sql, [$this, 'onSqlReady']);
+        $this->connection->getSocket()->query($this->sql, [$this, 'onSqlReady']);
 
         Timer::after($timeout, [$this, 'onQueryTimeout'], spl_object_hash($this));
         yield $this;
@@ -84,19 +85,19 @@ class Mysqli implements DriverInterface
         if ($result === false) {
             if (in_array($link->_errno, [2013, 2006])) {
                 $this->connection->close();
-                $exception = new MysqliConnectionLostException();
+                $exception = new MysqlConnectionLostException();
             } elseif ($link->_errno == 1064) {
                 $error = $link->_error;
                 $this->connection->release();
-                $exception = new MysqliSqlSyntaxException($error);
+                $exception = new MysqlSqlSyntaxException($error);
             } else {
                 $error = $link->_error;
                 $this->connection->release();
-                $exception = new MysqliQueryException($error);
+                $exception = new MysqlQueryException($error);
             }
         }
         $this->result = $result;
-        call_user_func_array($this->callback, [new MysqliResult($this), $exception]);
+        call_user_func_array($this->callback, [new MysqlResult($this), $exception]);
     }
 
     public function onQueryTimeout()
@@ -104,7 +105,7 @@ class Mysqli implements DriverInterface
         $this->connection->close();
 
         // TODO: sql记入日志
-        call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException()]);
+        call_user_func_array($this->callback, [null, new MysqlQueryTimeoutException()]);
     }
 
     public function getResult()
@@ -114,29 +115,32 @@ class Mysqli implements DriverInterface
 
     public function beginTransaction()
     {
-        $beginTransaction = (yield $this->connection->getSocket()->begin_transaction(MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT));
-        if (!$beginTransaction) {
-            throw new MysqliTransactionException('mysqli begin transaction error');
-        }
+        $beginTransaction = (yield $this->connection->getSocket()->query('BEGIN', function ($link, $result){
+            if (!$result) {
+                throw new MysqlTransactionException('mysql begin transaction error');
+            }
+        }));
         yield $beginTransaction;
     }
 
     public function commit()
     {
-        $commit = (yield $this->connection->getSocket()->commit());
-        if (!$commit) {
-            throw new MysqliTransactionException('mysqli commit error');
-        }
+        $commit = (yield $this->connection->getSocket()->query('COMMIT', function ($link, $result){
+            if (!$result) {
+                throw new MysqlTransactionException('mysql commit error');
+            }
+        }));
         $this->connection->release();
         yield $commit;
     }
 
     public function rollback()
     {
-        $rollback = (yield $this->connection->getSocket()->rollback());
-        if (!$rollback) {
-            throw new MysqliTransactionException('mysqli rollback error');
-        }
+        $rollback = (yield $this->connection->getSocket()->query('ROLLBACK', function ($link, $result){
+            if (!$result) {
+                throw new MysqlTransactionException('mysql rollback error');
+            }
+        }));
         $this->connection->release();
         yield $rollback;
     }

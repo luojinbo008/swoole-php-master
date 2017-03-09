@@ -19,7 +19,7 @@ class Flow
     const CONNECTION_STACK = 'connection_stack';
 
     private $engineMap = [
-        'Mysqli' => 'FPHP\Store\Database\Mysql\Mysqli',
+        'Mysql' => 'FPHP\Store\Database\Mysql\Mysql',
     ];
 
     public function query($sid, $data, $options)

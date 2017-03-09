@@ -15,13 +15,14 @@ use FPHP\Network\Connection\Factory\Http;
 use FPHP\Network\Connection\Factory\Mysqli;
 use FPHP\Network\Connection\Factory\Redis;
 use FPHP\Network\Connection\Factory\Syslog;
+use FPHP\Network\Connection\Factory\Mysql;
 
 class ConnectionInit
 {
     use Singleton;
 
     private $engineMap = [
-        'mysqli',
+        'mysql',
         'http',
         'redis',
         'syslog',
@@ -98,13 +99,14 @@ class ConnectionInit
             case 'Http':
                 $factory = new Http($config);
                 break;
-            case 'Mysqli':
-                $factory = new Mysqli($config);
+            case 'Mysql':
+                $factory = new Mysql($config);
                 break;
             default:
                 break;
         }
         $connectionPool = new Pool($factory, $config, $factoryType);
+
         ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $connectionPool);
     }
 }

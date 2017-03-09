@@ -11,10 +11,10 @@ namespace FPHP\Store\Database\Mysql;
 use FPHP\Contract\Store\Database\DbResultInterface;
 use FPHP\Contract\Store\Database\DriverInterface;
 
-class MysqliResult implements DbResultInterface
+class MysqlResult implements DbResultInterface
 {
     /**
-     * @var Mysqli
+     * @var Mysql
      */
     private $driver;
 

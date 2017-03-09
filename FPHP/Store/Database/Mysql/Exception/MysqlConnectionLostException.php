@@ -10,7 +10,7 @@ namespace FPHP\Store\Database\Mysql\Exception;
 
 use FPHP\Network\Connection\Exception\ConnectionLostException;
 
-class MysqliConnectionLostException extends ConnectionLostException
+class MysqlConnectionLostException extends ConnectionLostException
 {
 
 }
