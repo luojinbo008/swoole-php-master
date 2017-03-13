@@ -8,6 +8,7 @@
  */
 namespace FPHP\Store\Facade;
 
+use FPHP\Store\NoSQL\Flow;
 use RuntimeException;
 use FPHP\Network\Connection\ConnectionManager;
 use FPHP\Store\NoSQL\Redis\RedisManager;
@@ -25,35 +26,30 @@ class Cache
 
     public static function get($configKey, $keys)
     {
-        yield self::getRedisManager($configKey);
+
+        $flow = new Flow();
         $cacheKey = self::getConfigCacheKey($configKey);
         $realKey = self::getRealKey($cacheKey, $keys);
+        $sid = self::getRedisConnByConfigKey($configKey);
+        yield $flow->get($sid, $realKey);
+        return ;
+    }
+
+    public static function set($configKey, $value, $keys)
+    {
+        $flow = new Flow();
+        $cacheKey = self::getConfigCacheKey($configKey);
+        $realKey = self::getRealKey($cacheKey, $keys);
+        $sid = self::getRedisConnByConfigKey($configKey);
         if (!empty($realKey)) {
-            $result = (yield self::$redis->get($realKey));
+            $result = (yield $flow->set($sid, $realKey, $value, $cacheKey['exp']));
             yield $result;
         }
     }
 
     public static function expire($configKey, $key, $expire = 0)
     {
-        yield self::getRedisManager($configKey);
-        $cacheKey = self::getConfigCacheKey($configKey);
-        $realKey = self::getRealKey($cacheKey, $key);
-        if (!empty($realKey)) {
-            $result = (yield self::$redis->expire($realKey, $expire));
-            yield $result;
-        }
-    }
 
-    public static function set($configKey, $value, $keys)
-    {
-        yield self::getRedisManager($configKey);
-        $cacheKey = self::getConfigCacheKey($configKey);
-        $realKey = self::getRealKey($cacheKey, $keys);
-        if (!empty($realKey)) {
-            $result = (yield self::$redis->set($realKey, $value, $cacheKey['exp']));
-            yield $result;
-        }
     }
 
     private static function getRedisConnByConfigKey($configKey)
@@ -65,12 +61,6 @@ class Cache
             throw new RuntimeException('connection path config not found');
         }
         return $config['common']['connection'];
-    }
-
-    public static function getRedisManager($configKey)
-    {
-        $conn = (yield ConnectionManager::getInstance()->get(self::getRedisConnByConfigKey($configKey)));
-        self::$redis = new RedisManager($conn);
     }
 
     private static function getRealKey($config, $keys)

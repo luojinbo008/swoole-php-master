@@ -10,7 +10,8 @@ namespace FPHP\Store\Facade;
 
 use FPHP\Store\Database\Flow;
 
-class Db {
+class Db
+{
     const RETURN_AFFECTED_ROWS  = true;
     const USE_MASTER            = true;
     const RETURN_INSERT_ID      = false;

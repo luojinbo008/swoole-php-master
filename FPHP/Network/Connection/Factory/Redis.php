@@ -9,8 +9,7 @@
 namespace FPHP\Network\Connection\Factory;
 
 use FPHP\Contract\Network\ConnectionFactory;
-use FPHP\Network\Connection\Driver\Redis as Client;
-use FPHP\Store\NoSQL\Redis\RedisClient;
+use RuntimeException;
 
 class Redis implements ConnectionFactory
 {
@@ -27,11 +26,18 @@ class Redis implements ConnectionFactory
 
     public function create()
     {
-        $this->conn = new RedisClient($this->config['host'], $this->config['port']);
-        $redis = new Client();
-        $redis->setSocket($this->conn);
-        $redis->setConfig($this->config);
-        return $redis;
+        $this->conn = new \swoole_redis();
+        $this->conn->on('close', [$this, 'close']);
+        $this->conn->connect($this->config['host'], $this->config['port'],  function ($redis, $result) {
+            if (!$result) {
+                throw new RuntimeException($redis->errMsg);
+            }
+        });
+
+        $connection = new \FPHP\Network\Connection\Driver\Redis();
+        $connection->setSocket($this->conn);
+        $connection->setConfig($this->config);
+        return $connection;
     }
 
     public function close()

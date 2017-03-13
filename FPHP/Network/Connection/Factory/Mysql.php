@@ -36,7 +36,7 @@ class Mysql implements ConnectionFactory
 
         isset($this->config['port']) && $serverConfig['port'] = $this->config['port'];
 
-        $this->conn->on('close', [$this, 'onClose']);
+        $this->conn->on('close', [$this, 'close']);
         $this->conn->connect($this->config, function ($db, $result) {
             if ($result) {
                 $db->query('SET AUTOCOMMIT=0', function ($link, $result){

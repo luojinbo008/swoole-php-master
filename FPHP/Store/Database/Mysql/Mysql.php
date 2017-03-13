@@ -68,8 +68,8 @@ class Mysql implements DriverInterface
         $this->sql = $sql;
 
         $this->connection->getSocket()->query($this->sql, [$this, 'onSqlReady']);
-
         Timer::after($timeout, [$this, 'onQueryTimeout'], spl_object_hash($this));
+
         yield $this;
     }
 

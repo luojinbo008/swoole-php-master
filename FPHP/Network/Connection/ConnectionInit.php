@@ -12,7 +12,6 @@ namespace FPHP\Network\Connection;
 use FPHP\Foundation\Core\Config;
 use FPHP\Util\DesignPattern\Singleton;
 use FPHP\Network\Connection\Factory\Http;
-use FPHP\Network\Connection\Factory\Mysqli;
 use FPHP\Network\Connection\Factory\Redis;
 use FPHP\Network\Connection\Factory\Syslog;
 use FPHP\Network\Connection\Factory\Mysql;
@@ -106,7 +105,6 @@ class ConnectionInit
                 break;
         }
         $connectionPool = new Pool($factory, $config, $factoryType);
-
         ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $connectionPool);
     }
 }

@@ -17,11 +17,12 @@ class IndexController extends Controller
     public function index()
     {
 
-        $record = (yield Db::execute('mysql.demo.demo', []));
-        var_dump($record);
+         // $record = (yield Db::execute('mysql.demo.demo', []));
+         // var_dump($record);
 
-        $tmp = (yield Cache::get('demo.redis.cc', [11, 222]));
+        $tmp = (yield Cache::set('demo.redis.cc', 'xxxx', [11, 222]));
 
+        var_dump($tmp);
         yield $this->display('Module/www/index');
 
     }
