@@ -48,7 +48,7 @@ class Flow
         $connection = (yield $this->getConnectionByConnectionManager($sid));
         $driver = $this->getDriver($connection);
         $result = new ResultFormatter();
-        $driver->expire1($key, $expire, [$result, 'response']);
+        $driver->expire($key, $expire, [$result, 'response']);
         yield $result;
     }
 

@@ -12,6 +12,7 @@ return [
         'port'      => 6379,
         'pool'      => [
             'init-connection'       => '1',
+            'heartbeat-time'        =>  1000
         ],
     ],
 ];
