@@ -21,8 +21,8 @@ class IndexController extends Controller
          // var_dump($record);
 
         $tmp = (yield Cache::set('demo.redis.cc', 'xxxx', [11, 222]));
+        $tmp = (yield Cache::expire('demo.redis.cc', [11, 222], 100));
 
-        var_dump($tmp);
         yield $this->display('Module/www/index');
 
     }

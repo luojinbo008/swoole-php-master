@@ -6,11 +6,12 @@
  * Time: 16:44
  */
 
-namespace FPHP\Store\NoSQL\Redis;
+namespace FPHP\Store\NoSQL;
 
 use FPHP\Foundation\Contract\Async;
+use FPHP\Foundation\Exception\FPHPException;
 
-class RedisResult implements Async
+class ResultFormatter implements Async
 {
 
     private $callback = null;

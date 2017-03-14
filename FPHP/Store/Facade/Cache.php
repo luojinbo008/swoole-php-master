@@ -26,7 +26,6 @@ class Cache
 
     public static function get($configKey, $keys)
     {
-
         $flow = new Flow();
         $cacheKey = self::getConfigCacheKey($configKey);
         $realKey = self::getRealKey($cacheKey, $keys);
@@ -47,9 +46,16 @@ class Cache
         }
     }
 
-    public static function expire($configKey, $key, $expire = 0)
+    public static function expire($configKey, $keys, $expire = 0)
     {
-
+        $flow = new Flow();
+        $cacheKey = self::getConfigCacheKey($configKey);
+        $realKey = self::getRealKey($cacheKey, $keys);
+        $sid = self::getRedisConnByConfigKey($configKey);
+        if (!empty($realKey)) {
+            $result = (yield $flow->expire($sid, $realKey, $expire));
+            yield $result;
+        }
     }
 
     private static function getRedisConnByConfigKey($configKey)

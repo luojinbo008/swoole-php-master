@@ -14,9 +14,6 @@ use RuntimeException;
 
 class Flow
 {
-    const CONNECTION_CONTEXT = 'connection_context';
-    const CONNECTION_STACK = 'connection_stack';
-
     private $engineMap = [
         'Redis' => 'FPHP\Store\NoSQL\Redis\Redis',
     ];
@@ -24,30 +21,25 @@ class Flow
     public function get($sid, $key)
     {
         $connection = (yield $this->getConnectionByConnectionManager($sid));
-
         $driver = $this->getDriver($connection);
-
-        $connectionStack = (yield getContext(self::CONNECTION_STACK, null));
-        if (null !== $connectionStack && $connectionStack instanceof \SplStack) {
-            $connectionStack->push($connection);
-            yield setContext(self::CONNECTION_STACK, $connectionStack);
-            return;
-        }
-
-        yield $driver->get($key);
+        $result = new ResultFormatter();
+        $driver->get($key, [$result, 'response']);
+        yield $result;
     }
 
-    public function set($sid, $value, $key, $expire = 0)
+    public function set($sid, $key, $value, $expire = 0)
     {
         $connection = (yield $this->getConnectionByConnectionManager($sid));
         $driver = $this->getDriver($connection);
-        yield $driver->set($key, $value);
-
+        $result = new ResultFormatter();
+        $driver->set($key, $value, [$result, 'response']);
+        yield $result;
         if ($expire > 0) {
-            $ret = (yield $this->expire($sid, $key, $expire));
+            $ret = (yield $this->expire($sid, $key, 30000));
             if (!$ret) {
                 throw new RuntimeException('REDIS EXPIRE TIME ERROR');
             }
+            yield 'OK';
         }
     }
 
@@ -55,7 +47,9 @@ class Flow
     {
         $connection = (yield $this->getConnectionByConnectionManager($sid));
         $driver = $this->getDriver($connection);
-        yield $driver->expire($key, $expire);
+        $result = new ResultFormatter();
+        $driver->expire1($key, $expire, [$result, 'response']);
+        yield $result;
     }
 
     private function getConnectionByConnectionManager($sid)

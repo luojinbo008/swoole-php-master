@@ -11,8 +11,10 @@ namespace FPHP\Store\NoSQL\Redis;
 use FPHP\Contract\Store\NoSQL\DriverInterface;
 use FPHP\Contract\Network\Connection;
 use FPHP\Network\Server\Timer\Timer;
+use FPHP\Store\NoSQL\Redis\Exception\RedisCommandException;
+use FPHP\Store\NoSQL\Redis\Exception\RedisTimeoutException;
 
-class Redis implements DriverInterface
+class Redis
 {
     /**
      * @var Connection
@@ -43,20 +45,15 @@ class Redis implements DriverInterface
         return $this->connection;
     }
 
-    public function execute(callable $callback)
-    {
-        $this->callback = $callback;
-    }
-
     public function __call($method, $arguments)
     {
+        $this->callback = array_pop($arguments);
         $redis = $this->connection->getSocket();
         $config = $this->connection->getConfig();
         $timeout = isset($config['timeout']) ? $config['timeout'] : self::DEFAULT_REDIS_TIMEOUT;
         array_push($arguments, [$this, 'onReceive']);
-        Timer::after($timeout, [$this, 'onQueryTimeout'], spl_object_hash($this));
+        Timer::after($timeout, [$this, 'onTimeout'], spl_object_hash($this));
         call_user_func_array([$redis, $method], $arguments);
-
     }
 
     public function onReceive($link, $result)
@@ -64,17 +61,18 @@ class Redis implements DriverInterface
         Timer::clearAfterJob(spl_object_hash($this));
         $exception = null;
         if (false === $result) {
-            
+            $error = $link->errMsg;
+            $exception = new RedisCommandException($error);
+        } else {
+            $this->result = $result;
         }
-        $this->result = $result;
-        call_user_func_array($this->callback, [new RedisResult($this), $exception]);
+        $this->connection->release();
+        call_user_func($this->callback, $this->result, $exception);
     }
 
-    public function onQueryTimeout()
+    public function onTimeout()
     {
         $this->connection->close();
-
-        // TODO: sql记入日志
-        call_user_func_array($this->callback, [null, new \Exception()]);
+        call_user_func($this->callback, null, new RedisTimeoutException());
     }
 }
