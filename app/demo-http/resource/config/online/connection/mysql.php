@@ -16,7 +16,7 @@ return [
         'chatset'   => 'utf8',
         'pool'      => [
             'heartbeat-time'            => 5000,
-            'init-connection'           => 8,
+            'init-connection'           => 16,
         ],
     ]
 

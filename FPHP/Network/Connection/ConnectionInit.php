@@ -11,9 +11,7 @@ namespace FPHP\Network\Connection;
 
 use FPHP\Foundation\Core\Config;
 use FPHP\Util\DesignPattern\Singleton;
-use FPHP\Network\Connection\Factory\Http;
 use FPHP\Network\Connection\Factory\Redis;
-use FPHP\Network\Connection\Factory\Syslog;
 use FPHP\Network\Connection\Factory\Mysql;
 
 class ConnectionInit
@@ -22,9 +20,7 @@ class ConnectionInit
 
     private $engineMap = [
         'mysql',
-        'http',
         'redis',
-        'syslog',
     ];
 
     public $directory = '';
@@ -91,12 +87,6 @@ class ConnectionInit
         switch ($factoryType) {
             case 'Redis':
                 $factory = new Redis($config);
-                break;
-            case 'Syslog':
-                $factory = new Syslog($config);
-                break;
-            case 'Http':
-                $factory = new Http($config);
                 break;
             case 'Mysql':
                 $factory = new Mysql($config);
