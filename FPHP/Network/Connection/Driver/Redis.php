@@ -25,7 +25,6 @@ class Redis extends Base implements Connection
 
     public function heartbeat()
     {
-
         // 绑定心跳检测事件
         $this->classHash = spl_object_hash($this);
         $this->heartbeatLater();
@@ -61,5 +60,4 @@ class Redis extends Base implements Connection
         $this->release();
         $this->heartbeatLater();
     }
-
 }
