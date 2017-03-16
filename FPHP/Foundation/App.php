@@ -222,6 +222,7 @@ class App
         }
         throw new RuntimeException('Unable to detect application namespace.');
     }
+
     /**
      * 获得 http server.
      *
@@ -232,5 +233,12 @@ class App
         return $this->getContainer()
             ->make(ServerFactory::class)
             ->createHttpServer();
+    }
+
+    public function createWebSocketServer()
+    {
+        return $this->getContainer()
+            ->make(ServerFactory::class)
+            ->createWebSocketServer();
     }
 }

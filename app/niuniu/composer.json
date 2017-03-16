@@ -1,0 +1,16 @@
+{
+    "name": "fphp/niuniu-game",
+    "require": {
+        "phpunit/phpunit": "5.5.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Com\\Demo\\Src\\": "src",
+            "FPHP\\": "../../FPHP"
+        },
+        "files": [
+            "../../FPHP/Util/helpers.php",
+            "../../FPHP/Foundation/Coroutine/Command/Task.php"
+        ]
+    }
+}
