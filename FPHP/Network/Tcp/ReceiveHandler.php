@@ -2,84 +2,97 @@
 /**
  * Created by PhpStorm.
  * User: luojinbo
- * Date: 2017/2/15
- * Time: 17:08
+ * Date: 2017/3/30
+ * Time: 16:05
  */
 
-namespace FPHP\Network\Http;
+namespace FPHP\Network\Tcp;
 
-use FPHP\Util\Types\Time;
-use swoole_http_request as SwooleHttpRequest;
-use swoole_http_response as SwooleHttpResponse;
+use FPHP\Network\Tcp\Routing\Router;
+use \swoole_server as SwooleServer;
 
-use FPHP\Network\Http\Request\Request;
-use FPHP\Util\DesignPattern\Context;
 use FPHP\Foundation\Core\Config;
 use FPHP\Foundation\Core\Debug;
-use FPHP\Network\Http\Routing\Router;
 use FPHP\Foundation\Coroutine\Signal;
 use FPHP\Foundation\Coroutine\Task;
 use FPHP\Network\Server\Middleware\MiddlewareManager;
 use FPHP\Network\Server\Timer\Timer;
-use FPHP\Network\Http\Response\InternalErrorResponse;
-use FPHP\Network\Http\Response\BaseResponse;
+use FPHP\Util\DesignPattern\Context;
+use FPHP\Util\Types\Time;
+use FPHP\Network\Tcp\Request\Request;
+use FPHP\Network\Tcp\Response\Response;
 
-class RequestHandler
+
+class ReceiveHandler
 {
+    private $swooleServer = null;
     private $context = null;
-    private $middleWareManager = null;
+    private $response = null;
+    private $fd = null;
+    private $fromId = null;
     private $task = null;
-    private $event = null;
+    private $middleWareManager = null;
 
-    const DEFAULT_TIMEOUT = 1 * 1000;
-
+    const DEFAULT_TIMEOUT = 30 * 1000;
     public function __construct()
     {
         $this->context = new Context();
         $this->event = $this->context->getEvent();
     }
 
-    public function handle(SwooleHttpRequest $swooleRequest, SwooleHttpResponse $swooleResponse)
+    public function handle(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
-        try {
-            $request = Request::createFromSwooleHttpRequest($swooleRequest);
-            $this->initContext($request, $swooleResponse);
-            $this->middleWareManager = new MiddlewareManager($request, $this->context);
+        $this->swooleServer = $swooleServer;
+        $this->fd = $fd;
+        $this->fromId = $fromId;
 
-            $requestTask = new RequestTask($request, $swooleResponse, $this->context, $this->middleWareManager);
-            $coroutine = $requestTask->run();
+        $this->doReceive($data);
+    }
+
+    private function doReceive($data)
+    {
+        $request = new Request($this->fd, $this->fromId, $data);
+
+        $response = $this->response = new Response($this->swooleServer, $request);
+        $this->initContext($request, $response);
+        try {
+            if ($request->getIsHeartBeat()) {
+                $this->swooleServer->send($this->fd, $data);
+                return;
+            }
+            
+            $this->middleWareManager = new MiddlewareManager($request, $this->context);
+            $receiveTask = new ReceiveTask($request, $response, $this->context, $this->middleWareManager);
+            $coroutine = $receiveTask->run();
 
             //  bind event
-            $timeout = $this->context->get('request_timeout');
             $this->event->once($this->getRequestFinishJobId(), [$this, 'handleRequestFinish']);
 
+            $timeout = $this->context->get('request_timeout');
             Timer::after($timeout, [$this, 'handleTimeout'], $this->getRequestTimeoutJobId());
-
             $this->task = new Task($coroutine, $this->context);
             $this->task->run();
-        } catch (\Exception $e) {
+
+        } catch(\Exception $e) {
             if (Debug::get()) {
                 echo_exception($e);
             }
-            $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
-
-            Task::execute($coroutine, $this->context);
+            $this->response->sendException($e);
             $this->event->fire($this->getRequestFinishJobId());
+            return;
         }
     }
 
-    private function initContext($request, SwooleHttpResponse $swooleResponse)
+    private function initContext($request,  Response $response)
     {
         $this->context->set('request', $request);
-        $this->context->set('swoole_response', $swooleResponse);
+        $this->context->set('swoole_response', $response);
 
         $router = Router::getInstance();
         $route = $router->route($request);
+
         $this->context->set('controller_name', $route['controller_name']);
         $this->context->set('action_name', $route['action_name']);
-
-        $cookie = new Cookie($request, $swooleResponse);
-        $this->context->set('cookie', $cookie);
 
         $this->context->set('request_time', Time::stamp());
         $request_timeout = Config::get('server.request_timeout');
@@ -91,21 +104,12 @@ class RequestHandler
     public function handleRequestFinish()
     {
         Timer::clearAfterJob($this->getRequestTimeoutJobId());
-        $response = $this->context->get('response');
-        $coroutine = $this->middleWareManager->executeTerminators($response);
-        Task::execute($coroutine, $this->context);
     }
 
     public function handleTimeout()
     {
         $this->task->setStatus(Signal::TASK_KILLED);
-        $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
-        $this->context->set('response', $response);
-        $swooleResponse = $this->context->get('swoole_response');
-
-        $response->sendBy($swooleResponse);
-
-        $this->event->unregister($this->getRequestFinishJobId());
+        $this->event->fire($this->getRequestFinishJobId());
     }
 
     private function getRequestFinishJobId()

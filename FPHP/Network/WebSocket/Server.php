@@ -6,32 +6,21 @@
  * Date: 2017/2/14
  * Time: 14:24
  */
-namespace FPHP\Network\Http;
-use FPHP\Network\Http\ServerStart\InitExceptionHandlerChain;
-use FPHP\Network\Http\ServerStart\InitMiddleware;
-use FPHP\Network\Http\ServerStart\InitSqlMap;
-use FPHP\Network\Http\ServerStart\InitUrlConfig;
-use FPHP\Network\Http\ServerStart\InitRouter;
-use FPHP\Network\Http\ServerStart\InitUrlRule;
-use FPHP\Network\Server\WorkerStart\InitConnectionPool;
-use FPHP\Network\Http\ServerStart\InitCache;
+namespace FPHP\Network\WebSocket;
 
-use swoole_http_server as SwooleServer;
+use FPHP\Network\Server\ServerBase;
+use FPHP\Network\Http\ServerStart\InitSqlMap;
+use FPHP\Network\Server\ServerStart\InitConnectionPool;
+
+use swoole_websocket_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
 
-use FPHP\Network\Server\ServerBase;
 
 class Server extends ServerBase
 {
     protected $serverStartItems = [
-        InitRouter::class,
-        InitUrlRule::class,
-        InitUrlConfig::class,
-        InitMiddleware::class,
-        InitExceptionHandlerChain::class,
-        InitCache::class,
-        InitSqlMap::class,
+        InitSqlMap::class
     ];
 
     protected $workerStartItems = [
@@ -61,7 +50,9 @@ class Server extends ServerBase
         $this->swooleServer->on('workerStop', [$this, 'onWorkerStop']);
         $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
 
-        $this->swooleServer->on('request', [$this, 'onRequest']);
+        $this->swooleServer->on('open', [$this, 'onOpen']);
+        $this->swooleServer->on('message', [$this, 'onMessage']);
+        $this->swooleServer->on('close', [$this, 'onClose']);
 
         $this->bootServerStartItem();
         $this->swooleServer->start();
@@ -79,34 +70,43 @@ class Server extends ServerBase
 
     public function onStart($swooleServer)
     {
-        echo "http server start ......\n";
+        echo "webSocket server start ......\n";
     }
 
     public function onShutdown($swooleServer)
     {
-        echo "http server shutdown ...... \n";
+        echo "webSocket server shutdown ...... \n";
     }
 
     public function onWorkerStart($swooleServer, $workerId)
     {
-        echo "http worker start ..... \n";
+        echo "webSocket worker start ..... \n";
         $this->bootWorkerStartItem($workerId);
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
-        echo "http worker stop ..... \n";
+        echo "webSocket worker stop ..... \n";
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
     {
-        echo "http worker error ..... \n";
+        echo "webSocket worker error ..... \n";
     }
 
-    public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
+    public function onOpen(SwooleServer $server, SwooleHttpRequest $request)
     {
-        // @todo  请求数据
-        $handler = new RequestHandler();
-        $handler->handle($swooleHttpRequest, $swooleHttpResponse);
+        echo "open ..... \n";
+        (new OpenHandler())->handle($server, $request);
+    }
+
+    public function onMessage(SwooleServer $server, SwooleWebSocketFrame $frame)
+    {
+
+    }
+
+    public function onClose(SwooleServer $server, $fd)
+    {
+
     }
 }

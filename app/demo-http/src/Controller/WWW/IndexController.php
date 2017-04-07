@@ -16,7 +16,6 @@ class IndexController extends Controller
 {
     public function index()
     {
-
          // $record = (yield Db::execute('mysql.demo.demo', []));
          // var_dump($record);
 

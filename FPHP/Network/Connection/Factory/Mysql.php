@@ -9,7 +9,7 @@
 namespace FPHP\Network\Connection\Factory;
 
 use FPHP\Contract\Network\ConnectionFactory;
-use RuntimeException;
+use \RuntimeException;
 
 class Mysql implements ConnectionFactory
 {

@@ -23,7 +23,7 @@ class Task
 
     public static function execute($coroutine, Context $context = null, $taskId = 0, $parentId = 0)
     {
-        if($coroutine instanceof \Generator) {
+        if ($coroutine instanceof \Generator) {
             $task = new Task($coroutine, $context, $taskId, $parentId);
             $task->run();
             return $task;

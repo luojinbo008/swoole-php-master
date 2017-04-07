@@ -6,7 +6,7 @@
  * Date: 2017/2/21
  * Time: 14:25
  */
-namespace FPHP\Network\Server\ServerStart;
+namespace FPHP\Network\Server\WorkerStart;
 
 use FPHP\Network\Connection\ConnectionInit;
 use FPHP\Contract\Network\Initable;

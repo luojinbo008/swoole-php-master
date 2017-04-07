@@ -96,6 +96,7 @@ class HttpController extends Controller
     protected function dispatch($action, $mode = 0)
     {
         switch ($mode) {
+
         }
     }
 

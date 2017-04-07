@@ -73,7 +73,6 @@ class Response extends BaseResponse implements ResponseContract
         if ($content instanceof Jsonable) {
             return $content->toJson();
         }
-
         return json_encode($content);
     }
 

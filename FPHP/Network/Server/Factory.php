@@ -13,6 +13,7 @@ use FPHP\Foundation\Container\Di;
 use FPHP\Foundation\Core\Config;
 use FPHP\Network\Http\Server as HttpServer;
 use FPHP\Network\WebSocket\Server as WebSocketServer;
+use FPHP\Network\Tcp\Server as TcpServer;
 
 use swoole_http_server as SwooleHttpServer;
 use swoole_server as SwooleTcpServer;
@@ -56,6 +57,23 @@ class Factory
         }
         $swooleServer = Di::make(SwooleWebSocketServer::class, [$host, $port], true);
         $server = Di::make(WebSocketServer::class, [$swooleServer, $config]);
+        return $server;
+    }
+
+    public function createTcpServer()
+    {
+        $config = Config::get('server');
+        if (empty($config)) {
+            throw new RuntimeException('tcp server config not found');
+        }
+        $host = $config['host'];
+        $port = $config['port'];
+        $config = $config['config'];
+        if (empty($host) || empty($port)) {
+            throw new RuntimeException('tcp server config error: empty ip/port');
+        }
+        $swooleServer = Di::make(SwooleTcpServer::class, [$host, $port], true);
+        $server = Di::make(TcpServer::class, [$swooleServer, $config]);
         return $server;
     }
 }

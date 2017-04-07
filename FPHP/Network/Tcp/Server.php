@@ -3,35 +3,24 @@
 /**
  * Created by PhpStorm.
  * User: luojinbo
- * Date: 2017/2/14
- * Time: 14:24
+ * Date: 2017/3/28
+ * Time: 16:00
  */
-namespace FPHP\Network\Http;
-use FPHP\Network\Http\ServerStart\InitExceptionHandlerChain;
-use FPHP\Network\Http\ServerStart\InitMiddleware;
-use FPHP\Network\Http\ServerStart\InitSqlMap;
-use FPHP\Network\Http\ServerStart\InitUrlConfig;
-use FPHP\Network\Http\ServerStart\InitRouter;
-use FPHP\Network\Http\ServerStart\InitUrlRule;
+namespace FPHP\Network\Tcp;
+
 use FPHP\Network\Server\WorkerStart\InitConnectionPool;
-use FPHP\Network\Http\ServerStart\InitCache;
-
-use swoole_http_server as SwooleServer;
-use swoole_http_request as SwooleHttpRequest;
-use swoole_http_response as SwooleHttpResponse;
-
 use FPHP\Network\Server\ServerBase;
+use FPHP\Network\Tcp\ServerStart\InitCmdRule;
+use FPHP\Network\Tcp\ServerStart\InitSqlMap;
+use FPHP\Network\Tcp\ServerStart\InitRouter;
+use swoole_server as SwooleServer;
 
 class Server extends ServerBase
 {
     protected $serverStartItems = [
         InitRouter::class,
-        InitUrlRule::class,
-        InitUrlConfig::class,
-        InitMiddleware::class,
-        InitExceptionHandlerChain::class,
-        InitCache::class,
-        InitSqlMap::class,
+        InitCmdRule::class,
+        InitSqlMap::class
     ];
 
     protected $workerStartItems = [
@@ -49,9 +38,6 @@ class Server extends ServerBase
         $this->swooleServer->set($config);
     }
 
-    /**
-     * 启动 http-server
-     */
     public function start()
     {
         $this->swooleServer->on('start', [$this, 'onStart']);
@@ -61,52 +47,57 @@ class Server extends ServerBase
         $this->swooleServer->on('workerStop', [$this, 'onWorkerStop']);
         $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
 
-        $this->swooleServer->on('request', [$this, 'onRequest']);
+        $this->swooleServer->on('connect', [$this, 'onConnect']);
+        $this->swooleServer->on('receive', [$this, 'onReceive']);
+        $this->swooleServer->on('close', [$this, 'onClose']);
 
         $this->bootServerStartItem();
         $this->swooleServer->start();
     }
 
-    public function stop()
+    public function onConnect()
     {
-
+        echo "connecting ......\n";
     }
 
-    public function reload()
+    public function onClose()
     {
-
+        echo "closing .....\n";
     }
 
     public function onStart($swooleServer)
     {
-        echo "http server start ......\n";
+        echo "server start .....\n";
     }
 
     public function onShutdown($swooleServer)
     {
-        echo "http server shutdown ...... \n";
+        echo "server shutdown .....\n";
     }
 
     public function onWorkerStart($swooleServer, $workerId)
     {
-        echo "http worker start ..... \n";
         $this->bootWorkerStartItem($workerId);
+        echo "worker starting .....\n";
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
-        echo "http worker stop ..... \n";
+        echo "worker stoping ....\n";
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
     {
-        echo "http worker error ..... \n";
+        echo "worker error happening ....\n";
     }
 
-    public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
+    public function onPacket(SwooleServer $swooleServer, $data, array $clientInfo)
     {
-        // @todo  请求数据
-        $handler = new RequestHandler();
-        $handler->handle($swooleHttpRequest, $swooleHttpResponse);
+        echo "receive packet data\n\n\n\n";
+    }
+
+    public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)
+    {
+        (new ReceiveHandler())->handle($swooleServer, $fd, $fromId, $data);
     }
 }

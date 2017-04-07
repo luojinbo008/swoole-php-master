@@ -241,4 +241,11 @@ class App
             ->make(ServerFactory::class)
             ->createWebSocketServer();
     }
+
+    public function createTcpServer()
+    {
+        return $this->getContainer()
+            ->make(ServerFactory::class)
+            ->createTcpServer();
+    }
 }

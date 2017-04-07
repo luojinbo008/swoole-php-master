@@ -62,7 +62,6 @@ class Timer
 
         $timerId = swoole_timer_after($interval, self::formateAfterCallback($jobId, $callback));
         self::$afterMap[$jobId] = $timerId;
-
         return $jobId;
     }
 
